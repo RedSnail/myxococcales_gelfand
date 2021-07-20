@@ -5,3 +5,5 @@
 *.bed
 *.aln
 *.faa
+*.tsv
+*.csv
