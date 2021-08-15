@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
 genomes_table <- read.table("myxococcales_info.tsv", header=T, sep="\t")
-colnames(genomes_table) <- c("assembly_level", "AC", "len", "organism", "taxid")
+colnames(genomes_table) <- c("assembly_level", "AC", "len", "organism", "taxid", "annot_source")
 genomes_table$len <- round(genomes_table$len/1000000, digits=1)
 fam_table <- read.table("families.csv", header=F, sep=" ", col.names=c("family", "fam_id"))
 
