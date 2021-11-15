@@ -1,11 +1,16 @@
-# Myxococcaceae
-# Polyangiaceae
-Archangiaceae
-# Anaeromyxobacteraceae
-# Bulk
-# Vulgatibacteraceae|Anaeromyxobacteraceae|Archangiaceae|Myxococcaceae_Altrock
-# Kofleriaceae|Vulgatibacteraceae|Anaeromyxobacteraceae|Archangiaceae|Myxococcaceae_Altout
-# Kofleriaceae|Sandaracinaceae|Labilitrichaceae|Polyangiaceae|Sorangiineae_Mainstream
-# Sandaracinaceae|Labilitrichaceae|Polyangiaceae|Sorangiineae_Electronics
-# Anaeromyxobacteraceae_Indie
+ --threads 4
+# Altrock Vulgatibacteraceae,Anaeromyxobacteraceae,Archangiaceae,Myxococcaceae
+# Altout Kofleriaceae,Vulgatibacteraceae,Anaeromyxobacteraceae,Archangiaceae,Myxococcaceae
+# Mainstream Kofleriaceae,Sandaracinaceae,Labilitrichaceae,Polyangiaceae,Sorangiineae
+# Electronics Sandaracinaceae,Labilitrichaceae,Polyangiaceae,Sorangiineae
+# Anaero Anaeromyxobacteraceae --notree True
 # WithOut
+# Bulk_default --venn --notree --picsonly
+# Bulk_0.3 --venn --conn 0.3 --notree --picsonly
+# Bulk_0.1 --venn --conn 0.1 --notree --picsonly
+Bulk_0.1_1e-6 --venn --conn 0.1 --purity 1e-6 --notree
+Bulk_0.2_1e-6 --venn --conn 0.2 --purity 1e-6 --notree
+Bulk_0.2_1e-6 --venn --conn 0.3 --purity 1e-6 --notree
+Bulk_0.1_1e-8 --venn --conn 0.1 --purity 1e-8 --notree
+Bulk_0.2_1e-8 --venn --conn 0.2 --purity 1e-8 --notree
+Bulk_0.2_1e-8 --venn --conn 0.3 --purity 1e-8 --notree

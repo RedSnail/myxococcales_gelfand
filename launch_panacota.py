@@ -1,11 +1,12 @@
 import shutil
 import subprocess as sp
-from telegram import Bot
+from telegram import Bot, InputMediaPhoto
 from telegram import ParseMode
 import pandas as pd
 from PanACoTA.bin.run_panacota import parse_arguments
 from pathlib import Path
 import argparse as arp
+import concurrent.futures as cf
 
 
 def run_sub(subcommand):
@@ -20,15 +21,20 @@ HOME = Path("/home/oleg/myxococcales_gelfand/")
 bot = Bot(token=bot_token)
 
 
+def send_album(img_paths):
+    photos = list(map(lambda path: InputMediaPhoto(open(path, "rb")), img_paths))
+    bot.send_media_group(my_id, photos)
+
+
 def send_text(text):
     bot.sendMessage(chat_id=my_id, text=f"``{text}``", parse_mode=ParseMode.MARKDOWN)
 
 
 def send_image(path):
-    bot.send_photo(chat_id=my_id, photo=(HOME/path).open("rb"))
+    bot.send_photo(chat_id=my_id, photo=(HOME / path).open("rb"))
 
 
-def perform_pangenome(families, pandir, alias, genome_metadata):
+def perform_pangenome(families, pandir, alias, genome_metadata, notree, eval, conn, purity, minspec):
     acs = pd.unique(genome_metadata[genome_metadata.family.isin(families)]["AC"])
     lstinfo = pd.read_table((HOME / "WithOut_pan" / "LSTINFO-LSTINFO-With.lst"), sep="\t")
     mask = lstinfo.orig_name.str.contains("|".join(acs))
@@ -44,20 +50,35 @@ def perform_pangenome(families, pandir, alias, genome_metadata):
 
     name_map.apply(do_substitution, axis=1, args=(pandir,))
     ac_order = lstinfo.orig_name.str.extract("(" + "|".join(acs) + ")")[0]
-    name_map["species"] = genome_metadata.set_index("AC").organism[ac_order].reset_index(drop=True)
-    name_map.to_csv(pandir / "names_mapping.tsv", sep='\t', index=False, header=False)
-    run_sub(f"pangenome -l {lstinfo_path} -n {alias[:4]} -d {pandir / 'Proteins'} "
-            f"-o {pandir} -m proteinortho --threads 8 -v")
+    ac_map = pd.DataFrame({"AC": ac_order,
+                           "name": name_map.new,
+                           "species": genome_metadata.set_index("AC").organism[ac_order].reset_index(drop=True)})
+    ac_map.to_csv(pandir / "names_mapping.tsv", sep='\t', index=False, header=False)
+    pangenome_command = (f"pangenome -l {lstinfo_path} -n {alias[:4]} -d {pandir / 'Proteins'} "
+                         f"-o {pandir} -m proteinortho --threads 8 -v ")
+
+    if eval is not None:
+        pangenome_command += f"--eval {eval} "
+
+    if conn is not None:
+        pangenome_command += f"--conn {conn} "
+
+    if purity is not None:
+        pangenome_command += f"--purity {purity}"
+
+    if minspec is not None:
+        pangenome_command += f"--minspecies {minspec} "
+
+    run_sub(pangenome_command)
     send_text("proteinortho done")
-    run_sub(f"corepers -p {next(pandir.glob('PanGenome-*.lst'))} -o {pandir}")
-    run_sub(f"align -c {next(pandir.glob('PersGenome_*.lst'))} -l {lstinfo_path} "
-            f"-d {pandir} -o {pandir} --threads 8 -n {alias[:4]}")
+    if not notree:
+        run_sub(f"corepers -p {next(pandir.glob('PanGenome-*.lst'))} -o {pandir}")
+        run_sub(f"align -c {next(pandir.glob('PersGenome_*.lst'))} -l {lstinfo_path} "
+                f"-d {pandir} -o {pandir} --threads 8 -n {alias[:4]}")
 
 
 def run_pipeline(task):
-    if task.startswith("#"):
-        pass
-
+    print(task)
     alias = task.split()[0]
     pandir = HOME / f"{alias}_pan"
     pandir.mkdir(exist_ok=True)
@@ -84,31 +105,54 @@ def run_pipeline(task):
         add_args = task.split()[2:]
 
     parser = arp.ArgumentParser(description="Parse config args")
-    parser.add_argument("--picsonly", dest="pics", type=bool, default=False)
+    parser.add_argument("--picsonly", dest="pics", action="store_true")
+    parser.add_argument("--notree", dest="notree", action="store_true")
+    parser.add_argument("--venn", action="store_true", dest="venn")
+    parser.add_argument("--evalue", dest="eval", type=str, default=None)
+    parser.add_argument("--conn", dest="conn", type=str, default=None)
+    parser.add_argument("--purity", dest="purity", type=str, default=None)
+    parser.add_argument("--minspec", dest="minspec", type=float, default=None)
     args = parser.parse_args(add_args)
 
     if not args.pics:
-        perform_pangenome(families, pandir, alias, genome_metadata)
+        perform_pangenome(families, pandir, alias, genome_metadata, args.notree,
+                          args.eval, args.conn, args.purity, args.minspec)
+    
+    plots = []
+    if args.venn:
+        sp.run(f"{HOME / 'analyse_pan.R'} {alias} venn".split())
+        plots.append(f"Venn_plots/{alias}.png")
+    else:
+        pass
+        sp.run(f"{HOME / 'analyse_pan.R'} {alias}".split())
 
-    sp.run(f"{HOME/'analyse_pan.R'} {alias}".split())
+    plots.append(f"Error_plots/{alias}.png")
+    plots.append(f"Gord_plots/{alias}.png")
+    plots.append(f"Fam_distrs/{alias}.png")
+    plots.append(f"Copyn_hists/{alias}.png")
+
+    send_album(plots)
+
 
 def do_substitution(row, pandir):
     old = row[0]
     new = row[1]
-    dest_prt = pandir/"Proteins"/f"{new}.prt"
-    shutil.copyfile(HOME/"WithOut_pan"/"Proteins"/f"{old}.prt", dest_prt)
-    dest_gene = pandir/"Genes"/f"{new}.gen"
-    shutil.copyfile(HOME/"WithOut_pan"/"Genes"/f"{old}.gen", dest_gene)
+    dest_prt = pandir / "Proteins" / f"{new}.prt"
+    shutil.copyfile(HOME / "WithOut_pan" / "Proteins" / f"{old}.prt", dest_prt)
+    dest_gene = pandir / "Genes" / f"{new}.gen"
+    shutil.copyfile(HOME / "WithOut_pan" / "Genes" / f"{old}.gen", dest_gene)
     sp.run(f"sed -i s|{old}|{new}|g {dest_gene}".split())
     sp.run(f"sed -i s|{old}|{new}|g {dest_prt}".split())
 
 
-# with open("families_for_analysis.list") as configfile:
-#   for line in configfile:
-#        run_pipeline(line)
-
-run_pipeline("Testdrive Archangiaceae")
-
+with open("families_for_analysis.list") as configfile:
+    exe_parser = arp.ArgumentParser(description="Parse execution info.")
+    exe_parser.add_argument("--threads", type=int, dest="threads", default=1)
+    exe_args = exe_parser.parse_args(configfile.readline().split())
+    active_th = 0
+    filtered_lines = filter(lambda line: not line.startswith("#"), configfile)
+    with cf.ThreadPoolExecutor(max_workers=exe_args.threads) as executor:
+        executor.map(run_pipeline, list(filtered_lines))
 
 
 
