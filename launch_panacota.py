@@ -1,37 +1,17 @@
+import os
 import shutil
 import subprocess as sp
-from telegram import Bot, InputMediaPhoto
-from telegram import ParseMode
 import pandas as pd
 from PanACoTA.bin.run_panacota import parse_arguments
-from pathlib import Path
 import argparse as arp
 import concurrent.futures as cf
+from bot_utils import HOME, send_text, send_image, send_album
 
 
 def run_sub(subcommand):
     action, args = parse_arguments(subcommand.split())
     action(args)
 
-
-bot_token = "1489745929:AAGVfh8pJ8NMrjtBCiuiAaeVsp4tjwA4Z4M"
-my_id = 424187748
-HOME = Path("/home/oleg/myxococcales_gelfand/")
-
-bot = Bot(token=bot_token)
-
-
-def send_album(img_paths):
-    photos = list(map(lambda path: InputMediaPhoto(open(path, "rb")), img_paths))
-    bot.send_media_group(my_id, photos)
-
-
-def send_text(text):
-    bot.sendMessage(chat_id=my_id, text=f"``{text}``", parse_mode=ParseMode.MARKDOWN)
-
-
-def send_image(path):
-    bot.send_photo(chat_id=my_id, photo=(HOME / path).open("rb"))
 
 
 def perform_pangenome(families, pandir, alias, genome_metadata, notree, eval, conn, purity, minspec):
@@ -150,9 +130,14 @@ with open("families_for_analysis.list") as configfile:
     exe_parser.add_argument("--threads", type=int, dest="threads", default=1)
     exe_args = exe_parser.parse_args(configfile.readline().split())
     active_th = 0
-    filtered_lines = filter(lambda line: not line.startswith("#"), configfile)
-    with cf.ThreadPoolExecutor(max_workers=exe_args.threads) as executor:
-        executor.map(run_pipeline, list(filtered_lines))
+    filtered_lines = list(filter(lambda line: not line.startswith("#"), configfile))
+    env = os.getenv("MYXO_ENV", "MUSKRAT")
+    if env == "MUSKRAT":
+        with cf.ThreadPoolExecutor(max_workers=exe_args.threads) as executor:
+            executor.map(run_pipeline, filtered_lines)
+
+    if env == "MEATGRINDER":
+        run_pipeline(filtered_lines[int(os.environ["SGE_TASK_ID"]) - 1])
 
 
 
