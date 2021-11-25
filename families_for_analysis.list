@@ -4,13 +4,40 @@
 # Mainstream Kofleriaceae,Sandaracinaceae,Labilitrichaceae,Polyangiaceae,Sorangiineae
 # Electronics Sandaracinaceae,Labilitrichaceae,Polyangiaceae,Sorangiineae
 # Anaero Anaeromyxobacteraceae --notree True
-# WithOut
-# Bulk_default --venn --notree --picsonly
-# Bulk_0.3 --venn --conn 0.3 --notree --picsonly
-# Bulk_0.1 --venn --conn 0.1 --notree --picsonly
-Bulk_0.1_1e-6 --venn --conn 0.1 --purity 1e-6 --notree
-Bulk_0.2_1e-6 --venn --conn 0.2 --purity 1e-6 --notree
-Bulk_0.2_1e-6 --venn --conn 0.3 --purity 1e-6 --notree
-Bulk_0.1_1e-8 --venn --conn 0.1 --purity 1e-8 --notree
-Bulk_0.2_1e-8 --venn --conn 0.2 --purity 1e-8 --notree
-Bulk_0.2_1e-8 --venn --conn 0.3 --purity 1e-8 --notree
+# WithOut --eval 1e-04
+######### eval 1e-06
+# Bulk_0.1_1e-08_1e-06 --conn 0.1 --purity 1e-08 --eval 1e-06 --venn --notree
+# Bulk_0.2_1e-08_1e-06 --conn 0.2 --purity 1e-08 --eval 1e-06 --venn --notree
+# Bulk_0.3_1e-08_1e-06 --conn 0.3 --purity 1e-08 --eval 1e-06 --venn --notree
+#
+# Bulk_0.1_1e-07_1e-06 --conn 0.1 --purity 1e-07 --eval 1e-06 --venn --notree
+# Bulk_0.2_1e-07_1e-06 --conn 0.2 --purity 1e-07 --eval 1e-06 --venn --notree
+# Bulk_0.3_1e-07_1e-06 --conn 0.3 --purity 1e-07 --eval 1e-06 --venn --notree
+#
+# Bulk_0.1_1e-06_1e-06 --conn 0.1 --purity 1e-06 --eval 1e-06 --venn --notree
+# Bulk_0.2_1e-06_1e-06 --conn 0.2 --purity 1e-06 --eval 1e-06 --venn --notree
+# Bulk_0.3_1e-06_1e-06 --conn 0.3 --purity 1e-06 --eval 1e-06 --venn --notree
+######## eval 1e-05
+# Bulk_0.1_1e-08_1e-05 --conn 0.1 --purity 1e-08 --eval 1e-05 --venn --notree
+# Bulk_0.2_1e-08_1e-05 --conn 0.2 --purity 1e-08 --eval 1e-05 --venn --notree
+# Bulk_0.3_1e-08_1e-05 --conn 0.3 --purity 1e-08 --eval 1e-05 --venn --notree
+#
+# Bulk_0.1_1e-07_1e-05 --conn 0.1 --purity 1e-07 --eval 1e-05 --venn --notree
+# Bulk_0.2_1e-07_1e-05 --conn 0.2 --purity 1e-07 --eval 1e-05 --venn --notree
+# Bulk_0.3_1e-07_1e-05 --conn 0.3 --purity 1e-07 --eval 1e-05 --venn --notree
+#
+# Bulk_0.1_1e-06_1e-05 --conn 0.1 --purity 1e-06 --eval 1e-05 --venn --notree
+# Bulk_0.2_1e-06_1e-05 --conn 0.2 --purity 1e-06 --eval 1e-05 --venn --notree
+# Bulk_0.3_1e-06_1e-05 --conn 0.3 --purity 1e-06 --eval 1e-05 --venn --notree
+####### eval 1e-04
+# Bulk_0.1_1e-08_1e-04 --conn 0.1 --purity 1e-08 --eval 1e-04 --venn --notree
+# Bulk_0.2_1e-08_1e-04 --conn 0.2 --purity 1e-08 --eval 1e-04 --venn --notree
+# Bulk_0.3_1e-08_1e-04 --conn 0.3 --purity 1e-08 --eval 1e-04 --venn --notree
+#
+Bulk_0.1_1e-07_1e-04 --conn 0.1 --purity 1e-07 --eval 1e-04 --venn --notree
+Bulk_0.2_1e-07_1e-04 --conn 0.2 --purity 1e-07 --eval 1e-04 --venn --notree
+Bulk_0.3_1e-07_1e-04 --conn 0.3 --purity 1e-07 --eval 1e-04 --venn --notree
+#
+Bulk_0.1_1e-06_1e-04 --conn 0.1 --purity 1e-06 --eval 1e-04 --venn --notree
+Bulk_0.2_1e-06_1e-04 --conn 0.2 --purity 1e-06 --eval 1e-04 --venn --notree
+Bulk_0.3_1e-06_1e-04 --conn 0.3 --purity 1e-06 --eval 1e-04 --venn --notree
